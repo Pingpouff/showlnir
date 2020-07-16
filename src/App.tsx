@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import SearchForm from "./Search-form";
-import { Show } from './Show';
-import ShowList from './ShowList';
+import SearchForm from "./shows/Search-form";
+import { Show } from './shows/Show';
+import ShowList from './shows/ShowList';
 
 function App() {
   const initShows: Array<Show> = [];
