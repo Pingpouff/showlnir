@@ -1,6 +1,6 @@
 import { Show, Episode } from "./Show";
 import { SFC, useState } from "react";
-import { Card, CardContent, Typography, CardActions, IconButton, Collapse, Grid } from "@material-ui/core";
+import { Card, CardContent, Typography, CardActions, IconButton, Collapse, Grid, Divider, ListItemText, ListItem, List } from "@material-ui/core";
 import FavoriteIcon from "@material-ui/icons/Favorite";
 import ShareIcon from "@material-ui/icons/Share";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
@@ -18,22 +18,46 @@ const ShowItem: SFC<ShowItemProps> = (props) => {
     const [episodes, setEpisodes] = useState(emptyEpisodes);
     // const episodes = props.show._embedded
     const fetchEpisodesAndExpand = () => {
-        tvMazeFetchEpisodesFrom(props.show).then((loadedEpisodes) => {
-            setEpisodes(loadedEpisodes);
-            setExpanded(!expanded);
-        })
+        if (!expanded) {
+            tvMazeFetchEpisodesFrom(props.show).then((loadedEpisodes) => {
+                setEpisodes(loadedEpisodes);
+                setExpanded(true);
+            })
+        } else {
+            setExpanded(false);
+        }
     };
-    // TODO groupby Season
-//     <ListItem button>
-//     <ListItemText primary="Inbox" />
-//   </ListItem>
-//   <Divider />
-    const episodesTsx = episodes.map((ep, index) => {
+    type SeasonGrouped = { season: number, episode: Episode };
+    const seasonGroupedEpisodes = episodes.reduce((accu: Map<number, Episode[]>, currentValue: Episode) => {
+        const season = currentValue.season;
+        const episodesBySeason = accu.get(season);
+        if (episodesBySeason !== undefined) {
+            episodesBySeason.push(currentValue);
+        } else {
+            accu.set(season, [currentValue]);
+        }
+        return accu;
+    }, new Map());
+
+    const seasonGroupedEpisodesTsx = Array.from(seasonGroupedEpisodes.entries()).reverse().map((season) => {
+        const episodesTsx = season[1].reverse().map((ep, index) => {
+        const epLabel = `s${season[0]}e${ep.number}: ${ep.name}`
+            return (
+                // <Grid key={index} ep>
+                <Card> <CardContent>{epLabel}</CardContent></Card>
+                // </Grid>
+            );
+        });
+        const label = `Season ${season[0]}`
         return (
-            // <Grid key={index} ep>
-            <Card> <CardContent>{ep.name}</CardContent></Card>
-            // </Grid>
-        );
+            <List component="nav">
+                <ListItem button>
+                    <ListItemText primary={label} />
+                </ListItem>
+                <Grid container >
+                    {episodesTsx}
+                </Grid>
+            </List>);
     });
     return (
         <Card>
@@ -72,9 +96,7 @@ const ShowItem: SFC<ShowItemProps> = (props) => {
             </CardContent>
             <Collapse in={expanded} timeout="auto" unmountOnExit>
                 <CardContent>
-                    <Grid container >
-                        {episodesTsx}
-                    </Grid>
+                    {seasonGroupedEpisodesTsx}
                 </CardContent>
             </Collapse>
         </Card>

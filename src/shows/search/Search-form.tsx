@@ -46,6 +46,7 @@ const SearchForm: SFC<SearchFormProp> = (props) => {
           if (newValue) {
             props.add(newValue);
             setValue(null);
+            setInputValue('');
           }
         }}
         inputValue={inputValue}
