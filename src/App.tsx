@@ -7,11 +7,11 @@ import tvMazeServiceSearch from './shows/TvmazeService';
 
 function App() {
   const initShows: Array<Show> = [];
-  initShows.push({ title: 'first show' })
+  // initShows.push({ name: 'first show' })
   const [shows, setShows] = useState(initShows);
-  const addShow = (text: string) => {
-    console.log("TODO: search for show: " + text);
-    setShows(shows.concat([{ title: text }]));
+  const addShow = (showToAdd: Show) => {
+    console.log("TODO: search for show: " + showToAdd);
+    setShows(shows.concat(showToAdd));
   };
 
   return (

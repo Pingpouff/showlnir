@@ -1,11 +1,13 @@
 import React, { SFC, useState } from 'react';
 import './Search-form.css';
 // import Button from "@material-ui/core/Button";
-import { Show } from '../Show';
+// import { Show } from '../Show';
 import Autocomplete, { createFilterOptions } from '@material-ui/lab/Autocomplete';
 import { TextField } from '@material-ui/core';
+import { TvMazeSearchResult } from '../TvmazeService';
+import { Show } from '../Show';
 
-interface SearchFormProp { add: (name: string) => void, searchProvider: (searchText: string) => Promise<string[]> };
+interface SearchFormProp { add: (show: Show) => void, searchProvider: (searchText: string) => Promise<Show[]> };
 
 const SearchForm: SFC<SearchFormProp> = (props) => {
 
@@ -13,9 +15,9 @@ const SearchForm: SFC<SearchFormProp> = (props) => {
     props.searchProvider(searchText)
       .then(
         (result) => {
-          const newProps = result.map((elt: any) => elt.show.name);
-          console.log(newProps);
-          setSugestions(newProps);
+          // const newProps = result.map((elt: any) => elt.show.name);
+          // console.log(newProps);
+          setSugestions(result);
         },
         // Note: it's important to handle errors here
         // instead of a catch() block so that we don't swallow
@@ -31,16 +33,16 @@ const SearchForm: SFC<SearchFormProp> = (props) => {
       });
   };
 
-  const [value, setValue] = React.useState<string | null>('');
+  const [value, setValue] = React.useState<Show | null>();
   const [inputValue, setInputValue] = React.useState('');
 
-  const [sugestions, setSugestions] = useState<string[]>([]);
+  const [sugestions, setSugestions] = useState<Show[]>([]);
   return (
     <div className="Search-form">
       <Autocomplete
         id="Show-search"
         value={value}
-        onChange={(event: any, newValue: string | null) => {
+        onChange={(event: any, newValue: Show | null) => {
           if (newValue) {
             props.add(newValue);
             setValue(null);
@@ -52,7 +54,7 @@ const SearchForm: SFC<SearchFormProp> = (props) => {
           setInputValue(newInputValue);
         }}
         options={sugestions}
-        // getOptionLabel={(option) => option.title}
+        getOptionLabel={(option) => option.name}
         style={{ width: 300 }}
         renderInput={(params) => <TextField {...params} label="Show search" variant="outlined" />}
         filterOptions={(options, params) => {
