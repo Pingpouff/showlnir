@@ -1,17 +1,46 @@
 import { Show, Episode } from "./Show";
 import { SFC, useState } from "react";
-import { Card, CardContent, Typography, CardActions, IconButton, Collapse, Grid, Divider, ListItemText, ListItem, List } from "@material-ui/core";
+import { Card, CardContent, Typography, CardActions, IconButton, Collapse, Grid, Divider, ListItemText, ListItem, List, CardMedia, CardActionArea } from "@material-ui/core";
 import FavoriteIcon from "@material-ui/icons/Favorite";
 import ShareIcon from "@material-ui/icons/Share";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import DeleteOutlinedIcon from "@material-ui/icons/DeleteOutlined";
 import React from "react";
 import { tvMazeFetchEpisodesFrom } from "./TvmazeService";
+import { makeStyles, Theme, createStyles } from '@material-ui/core/styles';
+import clsx from 'clsx';
+import { red } from '@material-ui/core/colors';
 
+const useStyles = makeStyles((theme: Theme) =>
+    createStyles({
+        root: {
+            maxWidth: 345,
+        },
+        media: {
+            height: 0,
+            paddingTop: '56.25%', // 16:9
+        },
+        expand: {
+            transform: 'rotate(0deg)',
+            marginLeft: 'auto',
+            transition: theme.transitions.create('transform', {
+                duration: theme.transitions.duration.shortest,
+            }),
+        },
+        expandOpen: {
+            transform: 'rotate(180deg)',
+        },
+        avatar: {
+            backgroundColor: red[500],
+        },
+    }),
+);
 interface ShowItemProps {
     show: Show
 }
 const ShowItem: SFC<ShowItemProps> = (props) => {
+
+    const classes = useStyles();
     // const expanded = false;
     const [expanded, setExpanded] = useState(false);
     const emptyEpisodes: Episode[] = [];
@@ -38,10 +67,10 @@ const ShowItem: SFC<ShowItemProps> = (props) => {
         }
         return accu;
     }, new Map());
-
+    // TODO extract in the components
     const seasonGroupedEpisodesTsx = Array.from(seasonGroupedEpisodes.entries()).reverse().map((season) => {
         const episodesTsx = season[1].reverse().map((ep, index) => {
-        const epLabel = `s${season[0]}e${ep.number}: ${ep.name}`
+            const epLabel = `S${season[0]}E${ep.number}: ${ep.name}`
             return (
                 // <Grid key={index} ep>
                 <Card> <CardContent>{epLabel}</CardContent></Card>
@@ -62,9 +91,15 @@ const ShowItem: SFC<ShowItemProps> = (props) => {
     return (
         <Card>
             <CardContent>
-                <Typography variant="h5" component="h2">
-                    {props.show.name}
-                </Typography>
+                <CardActionArea onClick={fetchEpisodesAndExpand} >
+                    <CardMedia
+                        className={classes.media}
+                        image={props.show.image.medium.toString()}
+                    />
+                    <Typography variant="h5" component="h2">
+                        {props.show.name}
+                    </Typography>
+                </CardActionArea>
                 <CardActions>
                     <IconButton aria-label="add to favorites">
                         <FavoriteIcon />
@@ -73,9 +108,9 @@ const ShowItem: SFC<ShowItemProps> = (props) => {
                         <ShareIcon />
                     </IconButton>
                     <IconButton
-                        // className={clsx(classes.expand, {
-                        //   [classes.expandOpen]: this.state.expanded,
-                        // })}
+                        className={clsx(classes.expand, {
+                            [classes.expandOpen]: expanded,
+                        })}
                         onClick={fetchEpisodesAndExpand}
                         aria-expanded={expanded}
                         aria-label="show more"
